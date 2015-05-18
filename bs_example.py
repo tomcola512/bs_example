@@ -6,10 +6,11 @@ import unicode_magic as um
 
 url = "http://en.wikipedia.org/wiki/Chinese_language"
 page = urllib2.urlopen(url)
-soup = BeautifulSoup(page.read())
+#soup = BeautifulSoup(page.read())
+soup = BeautifulSoup(um.fix_bad_unicode(page.read().decode("utf-8")))
 
-table = soup.findAll(name = "table", attrs = {"class": "wikitable"}, limit = 3)[-1]
-rows = table.findAll("tr")
+raw_table = soup.findAll(name = "table", attrs = {"class": "wikitable"}, limit = 3)[-1]
+rows = raw_table.findAll("tr")
 
 table = []
 keys = [header.text for header in rows[0].findAll("th")]
@@ -18,7 +19,7 @@ table.append(keys)
 for i in range(len(rows)-1):
     table.append([rows[i+1].findAll("td")[j].text for j in range(len(keys))])
 
-table = [[um.fix_bad_unicode(table[i][j]) for j in range(len(table[0]))] for i in range(len(table))]
+table = [[table[i][j] for j in range(len(table[0]))] for i in range(len(table))]
     
 def dump(o):
     with codecs.open("output.txt", "w", "utf-8") as f:
